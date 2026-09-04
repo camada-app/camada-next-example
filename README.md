@@ -56,3 +56,23 @@ npm run dev                # -> http://localhost:3001
 - `next.config.mjs` widens Turbopack's root one directory up so it resolves through the
   `file:` symlinks to the sibling checkouts — not needed once `@camada/next` installs from
   npm.
+
+## Challenge (SDK-04)
+
+`/challenge-me` forces the first-party proof-of-work challenge, whatever the snapshot says — the
+same page the middleware serves automatically for a `challenge` verdict on snapshot v4. The
+route calls `challengeGate(req)`, which returns the challenge Response or `null` once the
+browser holds a valid `_cch` cookie.
+
+1. Browse `http://localhost:3001/challenge-me` — "Checking your browser" appears, the inline
+   solver hunts a SHA-256 with 16 leading zero bits (tens of milliseconds), the hidden form
+   posts to `/api/camada/challenge`, and the browser lands on "Challenge passed". Devtools shows
+   the `_cch` cookie (`HttpOnly`, `SameSite=Lax`, one hour); reload and the page renders at once.
+2. `curl -i http://localhost:3001/challenge-me -H 'accept: text/html' -H 'sec-fetch-dest: document'`
+   → **403** with `x-camada-challenge: 1` and the page in the body.
+3. Without an HTML `Accept` the answer is `403 {"error":"challenge_required"}` instead.
+4. The events tell the two apart: a served challenge ships `st: 403, blk: "challenge"`, a passed
+   one ships `st: 200, ch: 1`.
+
+The nonce and the cookie are bound to the client IP, so camada serves no challenge to a request
+it cannot identify — at the edge that means no trusted-proxy config and no `X-Forwarded-For`.
