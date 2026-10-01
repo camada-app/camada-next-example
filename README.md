@@ -11,6 +11,10 @@ The integration is three files:
 - `app/api/camada/[...camada]/route.ts` — `export const { GET, POST } = camadaRoute()`
 - `app/layout.tsx` — `<CamadaBeacon/>` in `<head>`
 
+Plus one optional wrapper: `app/api/data/route.ts` exports `GET = withCamada(handler)`, so its
+events carry the real status and `dur` (the middleware ships pre-response, without either).
+`proxy.ts` leaves `/api/data` out of its matcher so the request is recorded once.
+
 ## Setup
 
 The `@camada/*` packages are `file:` dependencies on sibling checkouts — build them
@@ -44,7 +48,10 @@ npm run dev                # -> http://localhost:3001
    → `403 Forbidden` with `x-block-reason` and `x-block-version` headers. (XFF is only
    honored because `.env` sets `CAMADA_TRUSTED_PROXY=hops:1`; without a trusted-proxy
    config a spoofed XFF is ignored by design.)
-3. **Fail open.** Kill the analyst (stop `npm run dev` in edge-analyst) and reload — the
+3. **Status and duration.** `curl -i http://localhost:3001/api/data` — the analyst's raw
+   event for it has `st: 200` and a `dur` in ms; a page such as `/` ships `st` and `dur` null
+   from the middleware.
+4. **Fail open.** Kill the analyst (stop `npm run dev` in edge-analyst) and reload — the
    app keeps serving normally. camada never takes the customer's app down; a dead analyst
    costs only dropped telemetry. `CAMADA_DISABLED=1` in `.env` bypasses the SDK entirely.
 
