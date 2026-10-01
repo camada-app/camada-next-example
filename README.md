@@ -13,7 +13,8 @@ The integration is three files:
 
 Plus one optional wrapper: `app/api/data/route.ts` exports `GET = withCamada(handler)`, so its
 events carry the real status and `dur` (the middleware ships pre-response, without either).
-`proxy.ts` leaves `/api/data` out of its matcher so the request is recorded once.
+`proxy.ts` leaves exactly `/api/data` out of its matcher (`api/data$`) so the request is
+recorded once. The `$` matters: without it `/api/database` would skip camada too.
 
 ## Setup
 
@@ -50,7 +51,8 @@ npm run dev                # -> http://localhost:3001
    config a spoofed XFF is ignored by design.)
 3. **Status and duration.** `curl -i http://localhost:3001/api/data` — the analyst's raw
    event for it has `st: 200` and a `dur` in ms; a page such as `/` ships `st` and `dur` null
-   from the middleware.
+   from the middleware. `curl -i http://localhost:3001/api/database` is still matched: it
+   answers with an `x-rid` header (the middleware ran), which `/api/data` doesn't.
 4. **Fail open.** Kill the analyst (stop `npm run dev` in edge-analyst) and reload — the
    app keeps serving normally. camada never takes the customer's app down; a dead analyst
    costs only dropped telemetry. `CAMADA_DISABLED=1` in `.env` bypasses the SDK entirely.
