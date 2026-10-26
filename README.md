@@ -70,8 +70,8 @@ npm run dev                # -> http://localhost:3001
 
 `/challenge-me` forces the first-party proof-of-work challenge, whatever the snapshot says — the
 same page the middleware serves automatically for a `challenge` verdict on snapshot v4. The
-route calls `challengeGate(req)`, which returns the challenge Response or `null` once the
-browser holds a valid `_cch` cookie.
+route calls `challengeGate(req)`, which returns the challenge Response, or `null` once the
+browser holds a valid `_cch` cookie or when the request is not a page load.
 
 1. Browse `http://localhost:3001/challenge-me` — "Checking your browser" appears, the inline
    solver hunts a SHA-256 with 16 leading zero bits (tens of milliseconds), the hidden form
@@ -79,9 +79,13 @@ browser holds a valid `_cch` cookie.
    the `_cch` cookie (`HttpOnly`, `SameSite=Lax`, one hour); reload and the page renders at once.
 2. `curl -i http://localhost:3001/challenge-me -H 'accept: text/html' -H 'sec-fetch-dest: document'`
    → **403** with `x-camada-challenge: 1` and the page in the body.
-3. Without an HTML `Accept` the answer is `403 {"error":"challenge_required"}` instead.
-4. The events tell the two apart: a served challenge ships `st: 403, blk: "challenge"`, a passed
-   one ships `st: 200, ch: 1`.
+3. A request without an HTML `Accept` (an API client, an image, a fetch) cannot solve a challenge,
+   so `challengeGate` returns `null` and the route renders (**200**). Under a `challenge` verdict
+   from the snapshot, the middleware passes such a request to the app signalled:
+   `x-camada-challenge: 1` and `cache-control: no-store`, and the app or client decides what to do.
+   A `null` from `challengeGate` cannot set headers, so this forced route carries no signal.
+4. The events tell the three apart: a served challenge ships `st: 403, blk: "challenge"`, a passed
+   one ships `st: 200, ch: 1`, and a signalled one (step 3) ships `st: 200, chs: 1`.
 
 The nonce and the cookie are bound to the client IP, so camada serves no challenge to a request
 it cannot identify — at the edge that means no trusted-proxy config and no `X-Forwarded-For`.

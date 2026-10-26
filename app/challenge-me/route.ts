@@ -1,6 +1,7 @@
 // SDK-04 demo: force the challenge for this route, whatever the snapshot says. In production
 // the same page is served automatically by the middleware for a `challenge` verdict.
-// challengeGate returns null once the browser holds a valid `_cch` cookie.
+// challengeGate returns null once the browser holds a valid `_cch` cookie, or for a request that
+// is not a page load (an API client cannot solve the page).
 import { challengeGate } from '@camada/next';
 
 const PASSED = `<!doctype html><meta charset="utf-8"><title>Challenge passed</title>
