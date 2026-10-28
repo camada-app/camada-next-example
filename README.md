@@ -70,8 +70,8 @@ npm run dev                # -> http://localhost:3001
 
 `/challenge-me` forces the first-party proof-of-work challenge, whatever the snapshot says — the
 same page the middleware serves automatically for a `challenge` verdict on snapshot v4. The
-route calls `challengeGate(req)`, which returns the challenge Response, or `null` once the
-browser holds a valid `_cch` cookie or when the request is not a page load.
+route calls `challengeGate(req, render)`, which returns the challenge Response, or the render once
+the browser holds a valid `_cch` cookie, or (signalled) when the request is not a page load.
 
 1. Browse `http://localhost:3001/challenge-me` — "Checking your browser" appears, the inline
    solver hunts a SHA-256 with 16 leading zero bits (tens of milliseconds), the hidden form
@@ -80,10 +80,10 @@ browser holds a valid `_cch` cookie or when the request is not a page load.
 2. `curl -i http://localhost:3001/challenge-me -H 'accept: text/html' -H 'sec-fetch-dest: document'`
    → **403** with `x-camada-challenge: 1` and the page in the body.
 3. A request without an HTML `Accept` (an API client, an image, a fetch) cannot solve a challenge,
-   so `challengeGate` returns `null` and the route renders (**200**). Under a `challenge` verdict
-   from the snapshot, the middleware passes such a request to the app signalled:
-   `x-camada-challenge: 1` and `cache-control: no-store`, and the app or client decides what to do.
-   A `null` from `challengeGate` cannot set headers, so this forced route carries no signal.
+   so the route renders (**200**) with the same signal the middleware gives such a request under
+   a `challenge` verdict from the snapshot: `x-camada-challenge: 1` and `cache-control: no-store`.
+   The app or client decides what to do.
+   `curl -i http://localhost:3001/challenge-me -H 'accept: application/json'`
 4. The events tell the three apart: a served challenge ships `st: 403, blk: "challenge"`, a passed
    one ships `st: 200, ch: 1`, and a signalled one (step 3) ships `st: 200, chs: 1`.
 
