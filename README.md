@@ -65,6 +65,9 @@ npm run dev                # -> http://localhost:3001
 - `next.config.mjs` widens Turbopack's root one directory up so it resolves through the
   `file:` symlinks to the sibling checkouts — not needed once `@camada/next` installs from
   npm.
+- In a factory pool slot the `@camada/*` siblings are symlinks to symlinks, which
+  Turbopack can't resolve (`Can't resolve '@camada/core'`, every request 500s). Widening the
+  root doesn't help; run `npx next dev --webpack -p 3001` there instead.
 
 ## Challenge (SDK-04)
 
