@@ -1,7 +1,8 @@
 // SDK-04 demo: force the challenge for this route, whatever the snapshot says. In production
 // the same page is served automatically by the middleware for a `challenge` verdict.
-// challengeGate returns null once the browser holds a valid `_cch` cookie, or for a request that
-// is not a page load (an API client cannot solve the page).
+// With a render callback, challengeGate serves the challenge to a page load; a browser holding a
+// valid `_cch` gets the render as is. An API client (it cannot solve the page) gets the render with
+// the middleware's signal applied: `x-camada-challenge: 1` and no-store.
 import { challengeGate } from '@camada/next';
 
 const PASSED = `<!doctype html><meta charset="utf-8"><title>Challenge passed</title>
@@ -11,8 +12,5 @@ const PASSED = `<!doctype html><meta charset="utf-8"><title>Challenge passed</ti
 the check again.</p>
 <p><a href="/">home</a></p>`;
 
-export async function GET(req: Request): Promise<Response> {
-  const gate = await challengeGate(req);
-  if (gate) return gate;
-  return new Response(PASSED, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } });
-}
+export const GET = (req: Request): Promise<Response> =>
+  challengeGate(req, () => new Response(PASSED, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' } }));
