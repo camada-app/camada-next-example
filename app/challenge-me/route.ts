@@ -1,8 +1,7 @@
 // SDK-04 demo: force the challenge for this route, whatever the snapshot says. In production
 // the same page is served automatically by the middleware for a `challenge` verdict.
-// With a render callback, challengeGate serves the challenge to a page load; a browser holding a
-// valid `_cch` gets the render as is. An API client (it cannot solve the page) gets the render with
-// the middleware's signal applied: `x-camada-challenge: 1` and no-store.
+// challengeGate serves the challenge to a page load, or the render: as is once the browser holds a
+// valid `_cch`, signalled (`x-camada-challenge: 1`) for an API client, which cannot solve the page.
 import { challengeGate } from '@camada/next';
 
 const PASSED = `<!doctype html><meta charset="utf-8"><title>Challenge passed</title>
