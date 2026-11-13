@@ -3,6 +3,29 @@
   "private": true,
   "version": "0.0.1",
   "license": "MIT",
+  "description": "Next.js App Router example app using @camada/next for edge middleware enforcement, first-party beacon routes, and proof-of-work challenges",
+  "homepage": "https://www.camada.app/docs/quickstart/nextjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/camada-app/camada-next-example.git"
+  },
+  "bugs": {
+    "url": "https://github.com/camada-app/camada-next-example/issues"
+  },
+  "keywords": [
+    "camada",
+    "nextjs",
+    "next",
+    "react",
+    "example",
+    "bot-detection",
+    "bot-protection",
+    "credential-stuffing",
+    "account-takeover",
+    "rate-limiting",
+    "proof-of-work",
+    "ai-scraper"
+  ],
   "scripts": {
     "dev": "next dev -p 3001",
     "build": "next build",
